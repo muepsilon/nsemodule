@@ -3,6 +3,7 @@ import requests
 from config import config,error_msg
 import six
 from math import ceil
+import re
 
 if six.PY2:
     from urllib import urlencode
@@ -36,6 +37,7 @@ class Nse():
     '''
     response = None
     status = None
+    keys = ['']
     try:
       # Encode Params
       symbols = ''
@@ -52,11 +54,11 @@ class Nse():
           stocks_data = r.json()["data"]
           if fields == None:
             for data in stocks_data:
-              quotes.append(data)
+              quotes.append(self.format_data(data))
           else:
             for data in stocks_data:
               cleaned_data = {k:v for k,v in data.iteritems() if k in fields}
-              quotes.append(cleaned_data)
+              quotes.append(self.format_data(cleaned_data))
           status = 200
           response = quotes[:] 
         except:
@@ -84,13 +86,13 @@ class Nse():
           data = r.json()["data"]
           if indices == None:
             for index in data:
-              indices_data.append(index)
+              indices_data.append(format_data(index))
           else:
             for index in data:
               if index["name"] in indices:
                 # Remove Image File Name key from response
                 del index["imgFileName"]
-                indices_data.append({index["name"]: index})
+                indices_data.append({index["name"]: format_data(index)})
           status = 200
           response = indices_data[:] 
         except:
@@ -162,3 +164,12 @@ class Nse():
       status = 422
       response = error_msg['422']
     return response,status
+
+  def format_data(self,input_dict):
+    output_dict = {}
+    for k,v in input_dict.iteritems():
+      if re.match(r'^[\d]+.[\d]+$', v) == None:
+        output_dict[k] = v
+      else:
+        output_dict[k] = float(v)
+    return output_dict
