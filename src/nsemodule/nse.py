@@ -2,6 +2,7 @@ import json
 import requests
 from config import config,error_msg
 import six
+from math import ceil
 
 if six.PY2:
     from urllib import urlencode
@@ -14,6 +15,25 @@ class Nse():
     pass
 
   def get_equity_quotes(self,stocks_symbols,fields = None):
+    response = []
+    status = None
+    N = len(stocks_symbols)
+    n_batches = int(ceil(N/5.0)) 
+    for batch in xrange(n_batches):
+      i,j = 5*batch, min(5*(batch+1),N) 
+      r = self.get_equity_quotes_batch(stocks_symbols[i:j],fields)
+      status = r['status']
+      if r['status']  == 200:
+        response+=r['response']  
+      else:
+        response = r['response']
+
+    return {"response": response, "status": status}
+
+  def get_equity_quotes_batch(self,stocks_symbols,fields = None):
+    '''
+    Warning: NSE allows fetching data of stocks only 5 at a time.
+    '''
     response = None
     status = None
     try:
