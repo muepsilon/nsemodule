@@ -86,13 +86,15 @@ class Nse():
           data = r.json()["data"]
           if indices == None:
             for index in data:
-              indices_data.append(format_data(index))
+              indices_data.append(self.format_data(index))
           else:
             for index in data:
               if index["name"] in indices:
                 # Remove Image File Name key from response
                 del index["imgFileName"]
-                indices_data.append({index["name"]: format_data(index)})
+                indices_data.append(self.format_data(index))
+              else:
+                print(index["name"])
           status = 200
           response = indices_data[:] 
         except:
