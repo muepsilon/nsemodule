@@ -82,7 +82,7 @@ class Nse():
     if r.status_code == 200:
       try:
         table_data = [[cell.text for cell in row('td')] for row in BeautifulSoup(r.text)("tr")]
-        ipo_details = [{table_data[0][i]:issue[i] for i in xrange(len(issue))} for issue in table_data[1:]]
+        ipo_details = [{table_data[0][i].lower().replace(" ","_"):issue[i] for i in xrange(len(issue))} for issue in table_data[1:]]
         response = json.dumps(ipo_details)
         status = 200
       except:
