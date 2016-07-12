@@ -4,6 +4,7 @@ from config import config,error_msg
 import six
 from math import ceil
 import re
+from bs4 import BeautifulSoup
 
 if six.PY2:
     from urllib import urlencode
@@ -73,6 +74,19 @@ class Nse():
     
     return {"response": response, "status": status}
 
+  def fetch_ipo_info(self, year = None):
+    response = None
+    status = None
+    r = requests.get("https://www.nseindia.com/products/content/equities/ipos/ipo_current.htm")
+
+    table_data = [[cell.text for cell in row('td')] for row in BeautifulSoup(r.text,'lxml')("tr")]
+
+    ipo_details = [{table_data[0][i]:issue[i] for i in xrange(len(issue))} for issue in table_data[1:]]
+
+    response = json.dumps(ipo_details)
+    
+    return {"response": response, "status": status}
+
   def get_indices(self,indices = None):
     response = None
     status = None
@@ -93,8 +107,6 @@ class Nse():
                 # Remove Image File Name key from response
                 del index["imgFileName"]
                 indices_data.append(self.format_data(index))
-              else:
-                print(index["name"])
           status = 200
           response = indices_data[:] 
         except:
