@@ -79,12 +79,18 @@ class Nse():
     status = None
     r = requests.get("https://www.nseindia.com/products/content/equities/ipos/ipo_current.htm")
 
-    table_data = [[cell.text for cell in row('td')] for row in BeautifulSoup(r.text,'lxml')("tr")]
+    if r.status_code == 200:
+      try:
+        table_data = [[cell.text for cell in row('td')] for row in BeautifulSoup(r.text)("tr")]
+        ipo_details = [{table_data[0][i]:issue[i] for i in xrange(len(issue))} for issue in table_data[1:]]
+        response = json.dumps(ipo_details)
+        status = 200
+      except:
+        status = 422
+        response = error_msg['422']
+    else:
+      status = r.status_code
 
-    ipo_details = [{table_data[0][i]:issue[i] for i in xrange(len(issue))} for issue in table_data[1:]]
-
-    response = json.dumps(ipo_details)
-    
     return {"response": response, "status": status}
 
   def get_indices(self,indices = None):

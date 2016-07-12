@@ -15,6 +15,7 @@ Simple and fast. Nsemodule is a library for collecting real time data from Natio
 Main Features:
 =============
 * Getting live quotes for stocks using stock symbols. Bulk GET API
+* Get current IPO information
 * Return data in json formats.
 * Getting quotes for all the indices traded in NSE, e.g NIFTY 50
 * Getting list of top losers.
