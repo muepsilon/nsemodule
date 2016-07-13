@@ -109,9 +109,8 @@ class Nse():
               indices_data.append(self.format_data(index))
           else:
             for index in data:
-              if index["name"] in indices:
+              if index["indexName"] in indices:
                 # Remove Image File Name key from response
-                del index["imgFileName"]
                 indices_data.append(self.format_data(index))
           status = 200
           response = indices_data[:] 
