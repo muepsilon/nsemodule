@@ -187,8 +187,8 @@ class Nse():
   def format_data(self,input_dict):
     output_dict = {}
     for k,v in input_dict.iteritems():
-      if re.match(r'^[\d]+.[\d]+$', v) == None:
+      if re.match(r'^[-.,\d]+$', v) == None:
         output_dict[k] = v
       else:
-        output_dict[k] = float(v)
+        output_dict[k] = float(v.replace(",",""))
     return output_dict
