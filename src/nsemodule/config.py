@@ -11,5 +11,15 @@ config = {
 error_msg = {
   "422": "Unprocessable Entity",
   "404":"Unable to fetch data",
-  "400":"Bad requests"
+  "400":"Bad requests",
+  "204": "No content"
+}
+mc = {
+  "autosuggest": "http://www.moneycontrol.com/mccode/common/autosuggesion.php?query={0}&type=1&format=json",
+  "balancesheet": "http://www.moneycontrol.com/financials/{0}/balance-sheetVI/{1}#{1}",
+  "suggest_parser" : {
+    "url": "link_src",
+    "info": "pdt_dis_nm",
+    "no_suggest": "<B>No Matches - Search Suggestions</B>"
+  }
 }
