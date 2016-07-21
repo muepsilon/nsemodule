@@ -1,6 +1,7 @@
 import json
 import requests
 from config import config,error_msg
+from finance import FinanceData
 import six
 from math import ceil
 import re
@@ -11,7 +12,7 @@ if six.PY2:
 elif six.PY3:
     from urllib.parse import urlencode
 
-class Nse():
+class Nse(FinanceData):
 
   def __init__(self):
     pass
