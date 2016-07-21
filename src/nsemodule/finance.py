@@ -124,10 +124,13 @@ class FinanceData():
         suggest_dict = json.loads(r_suggestion.text[1:-1])
         if suggest_dict[0][config.mc['suggest_parser']['info']] != config.mc['suggest_parser']['no_suggest'] :
           # Company which is listed on BSE & NSE will have format of (name,nse_symbol,bse_code)
+          # For those which are listed only on NSE, the format will be (name <some code>,nse_symbol)
           found = None
           for s in suggest_dict:
             info_list = s[config.mc['suggest_parser']['info']].split(",")
-            if len(info_list) == 3 and BeautifulSoup(info_list[1],"html.parser").text.strip().upper() == symbol.upper():
+            # Case BSE & NSE listed companies - list will have 3 entities
+            # Case NSE listed companies - list will have 2 entities
+            if len(info_list) in [ 2, 3 ] and BeautifulSoup(info_list[1],"html.parser").text.strip().upper() == symbol.upper():
               url = urlparse(s[config.mc['suggest_parser']['url']])
               try:
                 path_list = url.path.split('/')
@@ -137,6 +140,7 @@ class FinanceData():
                 break
               except:
                 status = 422
+          
           if found == None:
             status = 204
         else:
@@ -145,7 +149,6 @@ class FinanceData():
         status = 404
     except:
       print("Unexpected error:", sys.exc_info()[0])
-      raise
       status = 422
     if status != 200:
         response = config.error_msg[str(status)]
