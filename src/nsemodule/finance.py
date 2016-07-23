@@ -150,7 +150,7 @@ class FinanceData():
           info_text = re.sub('[^\w\&,\s]+','',BeautifulSoup(s[config.mc['suggest_parser']['info']],"html.parser").text)
           info_list = info_text.split(",")
           if len(info_list) in [ 2, 3 ]:
-            if info_list[1].strip().upper() == symbol.upper():
+            if info_list[1].strip().upper() == re.sub('[^\w\&,\s]+','',symbol.upper()):
               url = urlparse(s[config.mc['suggest_parser']['url']])
               try:
                 path_list = url.path.split('/')
