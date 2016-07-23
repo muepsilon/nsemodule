@@ -53,6 +53,7 @@ class FinanceData():
     status = fetch_url['status']
     if status != 200:
       fetch_url = self.generate_fin_data_url(symbol, companyName)
+      status = fetch_url['status']
     if status == 200:
       fin_url = fetch_url['response']['mc_url']
       r = requests.get(fin_url)
@@ -60,11 +61,12 @@ class FinanceData():
       if r.status_code == 200:
         standalone = self.parse_data_mc_company_page(r.text, "mktdet_1", "mktdet_1")
         consolidated = self.parse_data_mc_company_page(r.text, "mktdet_2", "mktdet_2")
-        response = {"standalone": standalone, "consolidated": consolidated }    
+        response = {"standalone": standalone, "consolidated": consolidated }
+      else:
+        response = "Unable to get reponse from MC for {0},{1}".format(symbol,companyName)
     else:
-      print("Unable to generate URL",symbol,companyName)
-    if status != 200:
-      response = config.error_msg[str(status)]   
+      response = "URL Generate error: {0} ".format(fetch_url['response'])
+     
     return {"response": response, "status": status}
 
   def parse_data_mc_company_page(self, htmltext, div_id, div_name):
@@ -143,30 +145,31 @@ class FinanceData():
         # For those which are listed only on NSE, the format will be (name <some code>,nse_symbol)
         found = None
         for s in suggest_dict:
-          info_list = s[config.mc['suggest_parser']['info']].split(",")
           # Case BSE & NSE listed companies - list will have 3 entities
           # Case NSE listed companies - list will have 2 entities
-          if len(info_list) in [ 2, 3 ] and BeautifulSoup(info_list[1],"html.parser").text.strip().upper() == symbol.upper():
-            url = urlparse(s[config.mc['suggest_parser']['url']])
-            try:
-              path_list = url.path.split('/')
-              response = {"symbol": path_list[-1],"name":path_list[-2],'url': config.mc['balancesheet'].format(path_list[-2],path_list[-1]),'mc_url': s[config.mc['suggest_parser']['url']]}
-              status = 200
-              found = True
-              break
-            except:
-              print(" Unable to parse url for ", symbol, companyName)
-              status = 422
+          info_text = re.sub('[^\w\&,\s]+','',BeautifulSoup(s[config.mc['suggest_parser']['info']],"html.parser").text)
+          info_list = info_text.split(",")
+          if len(info_list) in [ 2, 3 ]:
+            if info_list[1].strip().upper() == symbol.upper():
+              url = urlparse(s[config.mc['suggest_parser']['url']])
+              try:
+                path_list = url.path.split('/')
+                response = {"symbol": path_list[-1],"name":path_list[-2],'url': config.mc['balancesheet'].format(path_list[-2],path_list[-1]),'mc_url': s[config.mc['suggest_parser']['url']]}
+                status = 200
+                found = True
+                break
+              except:
+                response = " Unable to parse url for {0},{1}".format(symbol, companyName)
+                status = 422
         
         if found == None:
-          print("Not able to found",symbol)
+          response = "Not able to find {0}".format(symbol)
           status = 204
       else:
-        print(" Unexpeceted format received for ", symbol, companyName)
+        response = "Unexpeceted format received for {0},{1}".format(symbol, companyName)
         status = 204
     else:
-      print("Unable to get response from Autosuggest URL for ", symbol, companyName)
+      response = "Unable to get response from Autosuggest URL for {0},{1} ".format(symbol,companyName)
       status = 404
-    if status != 200:
-        response = config.error_msg[str(status)]
+
     return {'response': response,'status': status }
