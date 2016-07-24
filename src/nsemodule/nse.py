@@ -2,7 +2,9 @@ import json
 import requests
 from config import config,error_msg
 from finance import FinanceData
+import datetime
 import six
+import code
 from math import ceil
 import re
 from bs4 import BeautifulSoup
@@ -78,7 +80,7 @@ class Nse(FinanceData):
   def fetch_ipo_info(self, year = None):
     response = None
     status = None
-    r = requests.get("https://www.nseindia.com/products/content/equities/ipos/ipo_current.htm")
+    r = requests.get(config['ipo_url'])
 
     if r.status_code == 200:
       try:
@@ -92,6 +94,36 @@ class Nse(FinanceData):
     else:
       status = r.status_code
 
+    return {"response": response, "status": status}
+
+  def get_list_of_companies(self, listed_after = None):
+    response = None
+    status =None
+    r =requests.get(config['company_list_url'])
+    status = r.status_code
+    if status == 200:
+      rows = r.text.split("\n")
+      if len(rows) > 0:
+        # Removing labels row
+        # Keeping first four columns
+        # Symbol, Name, Type, Listing Date
+        companies_list = [ row.split(",")[0:4] for row in rows[1:]]
+        
+        if listed_after != None:
+          # Convert Date to Python Date
+          formatted_list = []
+          target_date = datetime.datetime.strptime(listed_after,'%d-%b-%Y')
+          for company in companies_list:
+            if len(company) == 4:
+              if datetime.datetime.strptime(company[3],'%d-%b-%Y') >= target_date:
+                formatted_list.append(company[0:2])
+        else:
+          formatted_list = [ company[0:2] for company in companies_list ]
+        response = json.dumps(formatted_list) 
+      else:
+        response = "Data not in required format"
+        status = 422
+      
     return {"response": response, "status": status}
 
   def get_indices(self,indices = None):

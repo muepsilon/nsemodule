@@ -16,6 +16,8 @@ Main Features:
 =============
 * Getting live quotes for stocks using stock symbols. Bulk GET API
 * Get current IPO information
+* Gets list of companies listed after specific date
+* Gets Finance Ratios for any Company listed on NSE
 * Return data in json formats.
 * Getting quotes for all the indices traded in NSE, e.g NIFTY 50
 * Getting list of top losers.

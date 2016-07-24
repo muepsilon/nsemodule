@@ -6,7 +6,9 @@ config = {
   'all_top_gainers_url': 'https://www.nseindia.com/live_market/dynaContent/live_analysis/gainers/allTopGainers1.json',
   'nifty_top_gainers_url': 'https://www.nseindia.com/live_market/dynaContent/live_analysis/gainers/niftyGainers1.json',
   'nifty_top_losers_url': 'https://www.nseindia.com/live_market/dynaContent/live_analysis/losers/niftyLosers1.json',
-  'all_top_losers_url': 'https://www.nseindia.com/live_market/dynaContent/live_analysis/losers/allTopLosers1.json'
+  'all_top_losers_url': 'https://www.nseindia.com/live_market/dynaContent/live_analysis/losers/allTopLosers1.json',
+  'ipo_url': "https://www.nseindia.com/products/content/equities/ipos/ipo_current.htm",
+  'company_list_url' : 'http://www.nseindia.com/content/equities/EQUITY_L.csv'
 }
 error_msg = {
   "422": "Unprocessable Entity",
