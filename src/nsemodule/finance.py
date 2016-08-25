@@ -5,6 +5,7 @@ import sys
 import json
 import six
 import code
+import random
 import re
 if six.PY2:
     from urlparse import urlparse
@@ -19,22 +20,53 @@ class FinanceData():
   def fetchBalanceSheet(self,symbol):
     fetch_url = self.generate_fin_data_url(symbol)
     status = fetch_url['status']
+    response = {"standalone": '',"consolidated": ''}
     if status == 200:
+      fin_url_c = fetch_url['response']['url_consolidate']
       fin_url = fetch_url['response']['url']
-      r = requests.get(fin_url)
-      if r.status_code == 200:
-        try:
-          target_div = BeautifulSoup(r.text,"html.parser").find('div',attrs = {'class':"boxBg1"})
-          tables = target_div.find_all('table',attrs = {'class': "table4"})
-          response = tables[1]
-        except:
-          print("Unexpected error:", sys.exc_info()[0])
-          status = 422
-      else:
-        status = r.status_code
+      response['standalone'],status = self.parseBalanceSheet(fin_url)
+      if status == 200:
+        response['consolidated'],status = self.parseBalanceSheet(fin_url_c)
     if status != 200:
       response = config.error_msg[str(status)]   
-    return {"response": response, "status": status}
+    return json.dumps({"response": response, "status": status})
+
+  def parseBalanceSheet(self,url):
+    response = None
+    status = 200
+    r = requests.get(url)
+    if r.status_code == 200:
+      try:
+        target_div = BeautifulSoup(r.text,"html.parser").find('div',attrs = {'class':"boxBg1"})
+        tables = target_div.find_all('table',attrs = {'class': "table4"})
+        bslist = [[cell.text for cell in row.find_all('td')] for row in tables[1].find_all('tr',attrs = {'height': "22px"})]
+        response = self.format_balance_sheet_data(bslist)
+      except:
+        status = 422
+    else:
+      status = r.status_code
+    return response,status
+  
+  def format_balance_sheet_data(self,bslist):
+    bsdata = {}
+    for row in bslist:
+      if len(row) > 1 and len(row[-1]) > 0:
+        key = re.sub('[^\w]','_',row[0].strip().lower())
+        if len(key) > 1 :
+          values = []
+          for value in row[1:]:
+            if re.match('[\d.,]+',value):
+              values.append(float(value.replace(',','')))
+            elif value == '-':
+              values.append("NA")
+            else:
+              values.append(value)
+          bsdata[key] = values
+        else:
+          if "mar" in row[1].lower():
+            key = "FY"
+            bsdata[key] = row[1:]
+    return bsdata
 
   def makelist(self,table):
     result = []
@@ -154,7 +186,7 @@ class FinanceData():
               url = urlparse(s[config.mc['suggest_parser']['url']])
               try:
                 path_list = url.path.split('/')
-                response = {"symbol": path_list[-1],"name":path_list[-2],'url': config.mc['balancesheet'].format(path_list[-2],path_list[-1]),'mc_url': s[config.mc['suggest_parser']['url']]}
+                response = {"symbol": path_list[-1],"name":path_list[-2],'url': config.mc['balancesheet'].format(path_list[-2],path_list[-1]),'mc_url': s[config.mc['suggest_parser']['url']],'url_consolidate': config.mc['balancesheet_consolidated'].format(path_list[-2],path_list[-1])}
                 status = 200
                 found = True
                 break
