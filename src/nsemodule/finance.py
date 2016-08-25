@@ -31,6 +31,20 @@ class FinanceData():
       response = config.error_msg[str(status)]   
     return json.dumps({"response": response, "status": status})
 
+  def fetchProfitLossSheet(self,symbol):
+    fetch_url = self.generate_fin_data_url(symbol)
+    status = fetch_url['status']
+    response = {"standalone": '',"consolidated": ''}
+    if status == 200:
+      fin_url_c = fetch_url['response']['url_profit_loss_consolidated']
+      fin_url = fetch_url['response']['url_profit_loss']
+      response['standalone'],status = self.parseBalanceSheet(fin_url)
+      if status == 200:
+        response['consolidated'],status = self.parseBalanceSheet(fin_url_c)
+    if status != 200:
+      response = config.error_msg[str(status)]   
+    return json.dumps({"response": response, "status": status})
+
   def parseBalanceSheet(self,url):
     response = None
     status = 200
@@ -186,7 +200,12 @@ class FinanceData():
               url = urlparse(s[config.mc['suggest_parser']['url']])
               try:
                 path_list = url.path.split('/')
-                response = {"symbol": path_list[-1],"name":path_list[-2],'url': config.mc['balancesheet'].format(path_list[-2],path_list[-1]),'mc_url': s[config.mc['suggest_parser']['url']],'url_consolidate': config.mc['balancesheet_consolidated'].format(path_list[-2],path_list[-1])}
+                response = {"symbol": path_list[-1],"name":path_list[-2],'url': config.mc['balancesheet'].format(path_list[-2],path_list[-1]),
+                'mc_url': s[config.mc['suggest_parser']['url']],
+                'url_consolidate': config.mc['balancesheet_consolidated'].format(path_list[-2],path_list[-1]),
+                'url_profit_loss': config.mc['profit_loss'].format(path_list[-2],path_list[-1]),
+                'url_profit_loss_consolidated': config.mc['profit_loss_consolidated'].format(path_list[-2],path_list[-1])
+                }
                 status = 200
                 found = True
                 break

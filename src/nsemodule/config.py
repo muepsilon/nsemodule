@@ -20,6 +20,8 @@ mc = {
   "autosuggest": "http://www.moneycontrol.com/mccode/common/autosuggesion.php?query={0}&type=1&format=json",
   "balancesheet": "http://www.moneycontrol.com/financials/{0}/balance-sheetVI/{1}#{1}",
   "balancesheet_consolidated": "http://www.moneycontrol.com/financials/{0}/consolidated-balance-sheetVI/{1}#{1}",
+  "profit_loss": "http://www.moneycontrol.com/financials/{0}/profit-lossVI/{1}#{1}",
+  "profit_loss_consolidated": "http://www.moneycontrol.com/financials/{0}/consolidated-profit-lossVI/{1}#{1}",
   "suggest_parser" : {
     "url": "link_src",
     "info": "pdt_dis_nm",
